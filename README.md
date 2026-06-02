@@ -15,6 +15,7 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind-v4-38BDF8?logo=tailwindcss&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Status](https://img.shields.io/badge/status-v1-success)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 [**Live → thetoolprinter.com**](https://thetoolprinter.com) · [Setup guide](SETUP.md) · [Architecture](docs/ARCHITECTURE.md) · [Pipeline](docs/PIPELINE.md)
 
@@ -137,6 +138,6 @@ Crons are defined in [`web/vercel.json`](web/vercel.json), so a clone + deploy t
 
 ## 📄 License
 
-Code is provided as-is. Editorial content (blog posts, scorecards, summaries) is © Geoff Hopkins, all rights reserved.
+Code is released under the [MIT License](LICENSE). Editorial content (blog posts, scorecards, summaries) is © Geoff Hopkins, all rights reserved.
 
 <div align="center"><sub>Built by <a href="https://thetoolprinter.com">The Tool Printer</a> · governed AI for people who have to decide.</sub></div>
