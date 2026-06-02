@@ -1,0 +1,144 @@
+{
+  "version": "1.0.0",
+  "steps": {
+    "lib/workflow/steps/fetch-github.ts": {
+      "fetchGitHub": {
+        "stepId": "step//./lib/workflow/steps/fetch-github//fetchGitHub"
+      }
+    },
+    "lib/workflow/steps/fetch-rss.ts": {
+      "fetchRSS": {
+        "stepId": "step//./lib/workflow/steps/fetch-rss//fetchRSS"
+      }
+    },
+    "lib/workflow/steps/scrape-people-stats.ts": {
+      "scrapePeopleStats": {
+        "stepId": "step//./lib/workflow/steps/scrape-people-stats//scrapePeopleStats"
+      }
+    },
+    "lib/workflow/steps/fetch-linkedin.ts": {
+      "fetchLinkedIn": {
+        "stepId": "step//./lib/workflow/steps/fetch-linkedin//fetchLinkedIn"
+      }
+    },
+    "lib/workflow/steps/fetch-og-images.ts": {
+      "fetchOGImages": {
+        "stepId": "step//./lib/workflow/steps/fetch-og-images//fetchOGImages"
+      }
+    },
+    "lib/workflow/steps/fetch-twitter.ts": {
+      "fetchTwitter": {
+        "stepId": "step//./lib/workflow/steps/fetch-twitter//fetchTwitter"
+      }
+    },
+    "lib/workflow/ingest.ts": {
+      "getWorkflowController": {
+        "stepId": "step//./lib/workflow/ingest//getWorkflowController"
+      },
+      "isStopRequested": {
+        "stepId": "step//./lib/workflow/ingest//isStopRequested"
+      },
+      "logRun": {
+        "stepId": "step//./lib/workflow/ingest//logRun"
+      },
+      "setStopRequested": {
+        "stepId": "step//./lib/workflow/ingest//setStopRequested"
+      }
+    },
+    "lib/workflow/steps/fetch-youtube.ts": {
+      "fetchYouTube": {
+        "stepId": "step//./lib/workflow/steps/fetch-youtube//fetchYouTube"
+      }
+    },
+    "lib/workflow/steps/route-items.ts": {
+      "routeItems": {
+        "stepId": "step//./lib/workflow/steps/route-items//routeItems"
+      }
+    },
+    "node_modules/.pnpm/workflow@4.2.0-beta.76_@nestjs+common@11.1.18_reflect-metadata@0.2.2_rxjs@7.8.2__@nestj_9437f052ae061e29d05e718b0d8898db/node_modules/workflow/dist/internal/builtins.js": {
+      "__builtin_response_array_buffer": {
+        "stepId": "__builtin_response_array_buffer"
+      },
+      "__builtin_response_json": {
+        "stepId": "__builtin_response_json"
+      },
+      "__builtin_response_text": {
+        "stepId": "__builtin_response_text"
+      }
+    },
+    "lib/workflow/steps/score-items.ts": {
+      "scoreNewItems": {
+        "stepId": "step//./lib/workflow/steps/score-items//scoreNewItems"
+      }
+    }
+  },
+  "workflows": {
+    "lib/workflow/ingest.ts": {
+      "ingestWorkflow": {
+        "workflowId": "workflow//./lib/workflow/ingest//ingestWorkflow",
+        "graph": {
+          "nodes": [
+            {
+              "id": "start",
+              "type": "workflowStart",
+              "data": {
+                "label": "Start: ingestWorkflow",
+                "nodeKind": "workflow_start"
+              }
+            },
+            {
+              "id": "end",
+              "type": "workflowEnd",
+              "data": {
+                "label": "Return",
+                "nodeKind": "workflow_end"
+              }
+            }
+          ],
+          "edges": [
+            {
+              "id": "e_start_end",
+              "source": "start",
+              "target": "end",
+              "type": "default"
+            }
+          ]
+        }
+      }
+    },
+    "lib/workflow/people-stats.ts": {
+      "peopleStatsWorkflow": {
+        "workflowId": "workflow//./lib/workflow/people-stats//peopleStatsWorkflow",
+        "graph": {
+          "nodes": [
+            {
+              "id": "start",
+              "type": "workflowStart",
+              "data": {
+                "label": "Start: peopleStatsWorkflow",
+                "nodeKind": "workflow_start"
+              }
+            },
+            {
+              "id": "end",
+              "type": "workflowEnd",
+              "data": {
+                "label": "Return",
+                "nodeKind": "workflow_end"
+              }
+            }
+          ],
+          "edges": [
+            {
+              "id": "e_start_end",
+              "source": "start",
+              "target": "end",
+              "type": "default"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "classes": {}
+}

@@ -1,0 +1,11 @@
+packages:
+  - "web"
+
+allowBuilds:
+  '@nestjs/core': false
+  '@swc/core': false
+  cbor-extract: false
+  esbuild: false
+  msw: false
+  sharp: false
+  unrs-resolver: false

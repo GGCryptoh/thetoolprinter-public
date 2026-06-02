@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Governance desk control room</title>
+  <desc id="desc">A dark editorial control room interface for governing AI agents.</desc>
+  <rect width="960" height="540" fill="#0b0b0d"/>
+  <rect x="64" y="62" width="832" height="416" rx="14" fill="#111113" stroke="#2a2a2f"/>
+  <rect x="96" y="96" width="360" height="164" rx="10" fill="#171719" stroke="#3f3420"/>
+  <rect x="504" y="96" width="360" height="164" rx="10" fill="#121817" stroke="#1f5f46"/>
+  <rect x="96" y="300" width="220" height="116" rx="10" fill="#151515" stroke="#303036"/>
+  <rect x="370" y="300" width="220" height="116" rx="10" fill="#151515" stroke="#303036"/>
+  <rect x="644" y="300" width="220" height="116" rx="10" fill="#151515" stroke="#303036"/>
+  <circle cx="124" cy="124" r="8" fill="#facc15"/>
+  <circle cx="532" cy="124" r="8" fill="#34d399"/>
+  <g fill="#f5f5f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text x="146" y="129" font-size="18" letter-spacing="3">AUTHORITY</text>
+    <text x="554" y="129" font-size="18" letter-spacing="3">EVIDENCE</text>
+    <text x="116" y="334" font-size="14" letter-spacing="2">IDENTITY</text>
+    <text x="390" y="334" font-size="14" letter-spacing="2">ESCALATION</text>
+    <text x="664" y="334" font-size="14" letter-spacing="2">AUDIT TRAIL</text>
+  </g>
+  <g fill="#a3a3a3" font-family="Inter, Arial, sans-serif" font-size="20">
+    <text x="116" y="180">Who owns the agent?</text>
+    <text x="116" y="212">What may it decide?</text>
+    <text x="524" y="180">What did it use?</text>
+    <text x="524" y="212">Who checked the result?</text>
+  </g>
+  <path d="M316 356h36c18 0 28-12 28-28v-24" fill="none" stroke="#facc15" stroke-width="2"/>
+  <path d="M590 356h36c18 0 28-12 28-28v-24" fill="none" stroke="#34d399" stroke-width="2"/>
+  <path d="M456 180h48" stroke="#57534e" stroke-width="2" stroke-dasharray="6 8"/>
+  <path d="M316 358h54" stroke="#57534e" stroke-width="2" stroke-dasharray="6 8"/>
+  <path d="M590 358h54" stroke="#57534e" stroke-width="2" stroke-dasharray="6 8"/>
+  <rect x="116" y="362" width="150" height="10" rx="5" fill="#facc15" opacity=".75"/>
+  <rect x="390" y="362" width="128" height="10" rx="5" fill="#e5e5e5" opacity=".45"/>
+  <rect x="664" y="362" width="168" height="10" rx="5" fill="#34d399" opacity=".65"/>
+  <text x="64" y="506" fill="#737373" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="4">THE TOOL PRINTER · GOVERNED AGENCY</text>
+</svg>

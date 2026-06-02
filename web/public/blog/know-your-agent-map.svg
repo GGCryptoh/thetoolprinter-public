@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Know Your Agent map</title>
+  <desc id="desc">A compact map of identity, authority, verification, revocation, and audit for AI agents.</desc>
+  <rect width="960" height="540" fill="#0f0f11"/>
+  <circle cx="480" cy="270" r="86" fill="#18181b" stroke="#facc15" stroke-width="2"/>
+  <circle cx="480" cy="270" r="34" fill="#facc15"/>
+  <text x="480" y="264" text-anchor="middle" fill="#111113" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700">AGENT</text>
+  <text x="480" y="284" text-anchor="middle" fill="#111113" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">IDENTITY</text>
+  <g stroke="#52525b" stroke-width="2">
+    <path d="M480 184V98"/>
+    <path d="M554 226l92-54"/>
+    <path d="M554 314l92 54"/>
+    <path d="M480 356v86"/>
+    <path d="M406 314l-92 54"/>
+    <path d="M406 226l-92-54"/>
+  </g>
+  <g fill="#171719" stroke="#303036">
+    <rect x="352" y="44" width="256" height="76" rx="10"/>
+    <rect x="650" y="126" width="220" height="92" rx="10"/>
+    <rect x="650" y="322" width="220" height="92" rx="10"/>
+    <rect x="352" y="420" width="256" height="76" rx="10"/>
+    <rect x="90" y="322" width="220" height="92" rx="10"/>
+    <rect x="90" y="126" width="220" height="92" rx="10"/>
+  </g>
+  <g font-family="Inter, Arial, sans-serif">
+    <g fill="#f5f5f5" font-size="20" font-weight="700">
+      <text x="480" y="78" text-anchor="middle">Owner</text>
+      <text x="760" y="162" text-anchor="middle">Authority</text>
+      <text x="760" y="358" text-anchor="middle">Verification</text>
+      <text x="480" y="456" text-anchor="middle">Revocation</text>
+      <text x="200" y="358" text-anchor="middle">Provenance</text>
+      <text x="200" y="162" text-anchor="middle">Audit</text>
+    </g>
+    <g fill="#a3a3a3" font-size="14">
+      <text x="480" y="99" text-anchor="middle">Named human + business purpose</text>
+      <text x="760" y="184" text-anchor="middle">Decide, recommend, execute</text>
+      <text x="760" y="380" text-anchor="middle">Evidence before action</text>
+      <text x="480" y="477" text-anchor="middle">Pause, limit, kill switch</text>
+      <text x="200" y="380" text-anchor="middle">Model, prompt, data, tools</text>
+      <text x="200" y="184" text-anchor="middle">Readable after the incident</text>
+    </g>
+  </g>
+  <text x="64" y="506" fill="#737373" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" letter-spacing="4">KNOW YOUR AGENT · TRUST IS CONTINUOUS</text>
+</svg>

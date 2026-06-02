@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/workflows/ingest",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/workflows/people-stats",
+      "schedule": "0 0 1 * *"
+    },
+    {
+      "path": "/api/cron/archive-rejected",
+      "schedule": "17 4 * * *"
+    },
+    {
+      "path": "/api/cron/rollup-metrics",
+      "schedule": "30 4 * * *"
+    }
+  ]
+}
