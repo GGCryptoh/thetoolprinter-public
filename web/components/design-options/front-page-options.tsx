@@ -433,8 +433,22 @@ function InfiniteArchive({
     });
   }, []);
 
+  // Items viewed during the current lightbox session stay visible (even with
+  // "Hide viewed" on) until the lightbox closes — otherwise they'd vanish
+  // mid-browse and shift the indices. On close they blink out slowly so the
+  // reader sees them go and has time to favorite for later.
+  const [pendingHideIds, setPendingHideIds] = useState<Set<string>>(() => new Set());
+  const [blinkingOut, setBlinkingOut] = useState(false);
+  const blinkTimerRef = useRef<number | null>(null);
+
   const markViewed = (id: string | undefined) => {
     if (!id) return;
+    setPendingHideIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
     setViewedIds((prev) => {
       if (prev.has(id)) return prev;
       const next = new Set(prev);
@@ -458,7 +472,9 @@ function InfiniteArchive({
   };
 
   const displayArchive = hydrated && hideViewed
-    ? archive.filter((item) => !(item.id && viewedIds.has(item.id)))
+    ? archive.filter(
+        (item) => !(item.id && viewedIds.has(item.id)) || (item.id !== undefined && pendingHideIds.has(item.id)),
+      )
     : archive;
   const [visibleCount, setVisibleCount] = useState(Math.min(16, archive.length));
   useEffect(() => {
@@ -471,13 +487,37 @@ function InfiniteArchive({
 
   const openItem = (index: number) => {
     setActiveIndex(index);
-    markViewed(visibleArchive[index]?.id);
+    // Index into displayArchive (the lightbox's item list), not the sliced
+    // visible window — arrow-key browsing can go past visibleCount.
+    markViewed(displayArchive[index]?.id);
   };
 
   const onLightboxChange = (index: number) => {
     setActiveIndex(index);
-    markViewed(visibleArchive[index]?.id);
+    markViewed(displayArchive[index]?.id);
   };
+
+  // Lightbox closed: if "Hide viewed" is on, blink the just-viewed cards —
+  // 1/s for 5s, then 2/s for 5s — before they leave the grid, so the reader
+  // can still favorite anything they want to read later.
+  const onLightboxClose = () => {
+    setActiveIndex(null);
+    if (!hideViewed || pendingHideIds.size === 0) {
+      setPendingHideIds(() => new Set());
+      return;
+    }
+    setBlinkingOut(true);
+    if (blinkTimerRef.current !== null) window.clearTimeout(blinkTimerRef.current);
+    blinkTimerRef.current = window.setTimeout(() => {
+      setPendingHideIds(() => new Set());
+      setBlinkingOut(false);
+      blinkTimerRef.current = null;
+    }, 10_000);
+  };
+
+  useEffect(() => () => {
+    if (blinkTimerRef.current !== null) window.clearTimeout(blinkTimerRef.current);
+  }, []);
 
   // "More news" handoff target: open the lightbox on the first item the
   // reader hasn't viewed yet (falling back to the top of the stream), making
@@ -525,12 +565,18 @@ function InfiniteArchive({
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {visibleArchive.map((item, index) => {
           const isViewed = hydrated && !!item.id && viewedIds.has(item.id);
+          const isBlinking = blinkingOut && !!item.id && pendingHideIds.has(item.id);
           return (
           <article
             key={item.id ?? item.title}
             className={`rounded-md border border-neutral-800 bg-neutral-950/40 p-4 transition-colors hover:border-neutral-600 ${
               isViewed ? 'opacity-50' : ''
             }`}
+            style={
+              isBlinking
+                ? { animation: 'tp-blink-slow 1s ease-in-out 5, tp-blink-fast 0.5s ease-in-out 5s 10' }
+                : undefined
+            }
           >
             <div className="flex items-center justify-between gap-4">
               <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-600">
@@ -578,10 +624,16 @@ function InfiniteArchive({
           You have viewed every item. Uncheck &ldquo;Hide viewed&rdquo; to browse again.
         </p>
       )}
+      {blinkingOut && (
+        <style>{`
+          @keyframes tp-blink-slow { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.12; } }
+          @keyframes tp-blink-fast { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.08; } }
+        `}</style>
+      )}
       <IntelligenceLightbox
         items={displayArchive}
         activeIndex={activeIndex}
-        onClose={() => setActiveIndex(null)}
+        onClose={onLightboxClose}
         onChange={onLightboxChange}
       />
     </section>
