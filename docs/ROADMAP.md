@@ -11,8 +11,12 @@ The governed reader surface.
 - Mobile-first front page reorder (news above thesis, "more news below" jump)
 - HTML entity decoding at both ingest and display
 - ESC-to-back on every subpage
-- Email registration via `/api/register` → n8n (lead magnet for v0.2)
+- Email registration via `/api/register` → n8n (lead magnet for v0.2), rate-limited 3/hr/IP
 - Blog scaffolding at `/blog` with hand-written posts
+- Newest-first news feed ordering (homepage, archive stream, controller preview)
+- Publishing gate overflow drain — hybrid-mode items above the auto-approve
+  threshold that miss the per-run cap are re-evaluated every run instead of
+  stranding in the review queue
 
 ## v0.2 — planned
 
@@ -62,7 +66,10 @@ Effort estimate: medium — the scoring + proposal LLM step is the bulk, the adm
 
 ### Operational hardening
 
-- Rate limit `/api/register` (the lead magnet endpoint is currently open).
+- ~~Rate limit `/api/register`~~ — shipped: 3 attempts/hour/IP, process-local.
+  Upgrade to Upstash/Vercel KV if a distributed, cold-start-resistant limit
+  is ever needed.
+- Set `CRON_SECRET` in production so cron/ingest endpoints require auth.
 - Touch swipe gestures on the article lightbox.
 - Loading skeletons on home + archive (currently relying on Suspense fallback).
 - Per-post OG image generation.
