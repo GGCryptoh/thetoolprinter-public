@@ -330,6 +330,10 @@ function EditorialLedger({
         activeIndex={activeStory}
         onClose={() => setActiveStory(null)}
         onChange={setActiveStory}
+        onEndReached={() => {
+          setActiveStory(null);
+          document.getElementById('infinite-older-stream')?.scrollIntoView({ behavior: 'smooth' });
+        }}
       />
       {isVisible('infinite_older_stream') && <InfiniteArchive archiveItems={archiveItems} showButton={isVisible('load_older_button')} />}
     </Shell>
@@ -621,11 +625,16 @@ function IntelligenceLightbox({
   activeIndex,
   onClose,
   onChange,
+  onEndReached,
 }: {
   items: IntelligenceItem[];
   activeIndex: number | null;
   onClose: () => void;
   onChange: (index: number) => void;
+  // When set, Next on the last item calls this instead of wrapping to the
+  // first — used by the top-stories lightbox to hand off into the older
+  // stream ("More news").
+  onEndReached?: () => void;
 }) {
   const { favorites, hydrated: favoritesHydrated, toggle: toggleFavorite } = useFavorites();
   const touchStateRef = useRef({ startX: 0, startY: 0, startT: 0, tracking: false });
@@ -646,7 +655,11 @@ function IntelligenceLightbox({
       }
       if (event.key === 'ArrowRight') {
         event.preventDefault();
-        onChange((activeIndex + 1) % items.length);
+        if (activeIndex === items.length - 1 && onEndReached) {
+          onEndReached();
+        } else {
+          onChange((activeIndex + 1) % items.length);
+        }
       }
       const href = items[activeIndex]?.href;
       if (event.key === 'Enter' && href) {
@@ -657,12 +670,19 @@ function IntelligenceLightbox({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeIndex, items, onChange, onClose]);
+  }, [activeIndex, items, onChange, onClose, onEndReached]);
 
   if (activeIndex === null || !items[activeIndex]) return null;
   const item = items[activeIndex];
+  const isLast = activeIndex === items.length - 1;
   const previous = () => onChange((activeIndex - 1 + items.length) % items.length);
-  const next = () => onChange((activeIndex + 1) % items.length);
+  const next = () => {
+    if (isLast && onEndReached) {
+      onEndReached();
+      return;
+    }
+    onChange((activeIndex + 1) % items.length);
+  };
 
   const handleDoubleTapLike = () => {
     if (!favoritesHydrated || !item.id) return;
@@ -775,8 +795,16 @@ function IntelligenceLightbox({
                 <ArrowLeft className="size-4" />
                 Previous
               </button>
-              <button type="button" onClick={next} className="inline-flex items-center gap-2 rounded-md border border-neutral-700 px-3 py-2 text-sm text-neutral-300 hover:border-neutral-500 hover:text-white">
-                Next
+              <button
+                type="button"
+                onClick={next}
+                className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
+                  isLast && onEndReached
+                    ? 'border-yellow-500/50 text-yellow-200 hover:border-yellow-400 hover:text-yellow-100'
+                    : 'border-neutral-700 text-neutral-300 hover:border-neutral-500 hover:text-white'
+                }`}
+              >
+                {isLast && onEndReached ? 'More news' : 'Next'}
                 <ArrowRight className="size-4" />
               </button>
             </div>
