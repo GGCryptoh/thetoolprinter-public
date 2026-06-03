@@ -10,12 +10,16 @@ export async function routeItems(workflowRunId?: string, limit = 500): Promise<n
   console.log('[route-items] Starting threshold routing');
   const supabase = createServiceClient();
 
+  // Pick up ALL scored pending items, including ones routed in a previous run
+  // that exceeded the hybrid per-run auto-approve cap (they keep status
+  // 'pending' but already have a section). Re-evaluating them every run lets
+  // the cap overflow drain instead of stranding above-threshold items in the
+  // review queue forever.
   const { data: items, error } = await supabase
     .from('aitea_news_items')
     .select('*')
     .not('score', 'is', null)
     .eq('status', 'pending')
-    .is('section', null)
     .is('archived_at', null)
     .order('scored_at', { ascending: true })
     .limit(Math.max(1, Math.min(500, Math.floor(limit))));
@@ -56,6 +60,13 @@ export async function routeItems(workflowRunId?: string, limit = 500): Promise<n
     }
 
     const effectiveSection = section ?? (status === 'approved' ? DEFAULT_THRESHOLDS.signalsMin <= item.score ? 'signals' : null : null);
+
+    // Re-scanned items that stay pending with an unchanged section need no
+    // write — skip them so hourly runs don't churn the review queue.
+    if (status === 'pending' && item.section === effectiveSection) {
+      review++;
+      continue;
+    }
 
     await supabase
       .from('aitea_news_items')
