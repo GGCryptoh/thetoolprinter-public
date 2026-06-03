@@ -204,6 +204,9 @@ function EditorialLedger({
   const stories = liveStories.length > 0 ? liveStories : topStories;
   const archiveItems = showLiveFeed ? archiveIntelligence : [];
   const [activeStory, setActiveStory] = useState<number | null>(null);
+  // Registered by InfiniteArchive so "More news" on the last top story can
+  // open the older-stream lightbox directly on the first unviewed item.
+  const openArchiveLightboxRef = useRef<(() => void) | null>(null);
 
   return (
     <Shell>
@@ -332,10 +335,22 @@ function EditorialLedger({
         onChange={setActiveStory}
         onEndReached={() => {
           setActiveStory(null);
-          document.getElementById('infinite-older-stream')?.scrollIntoView({ behavior: 'smooth' });
+          if (openArchiveLightboxRef.current) {
+            openArchiveLightboxRef.current();
+          } else {
+            document.getElementById('infinite-older-stream')?.scrollIntoView({ behavior: 'smooth' });
+          }
         }}
       />
-      {isVisible('infinite_older_stream') && <InfiniteArchive archiveItems={archiveItems} showButton={isVisible('load_older_button')} />}
+      {isVisible('infinite_older_stream') && (
+        <InfiniteArchive
+          archiveItems={archiveItems}
+          showButton={isVisible('load_older_button')}
+          registerOpenFirstUnviewed={(fn) => {
+            openArchiveLightboxRef.current = fn;
+          }}
+        />
+      )}
     </Shell>
   );
 }
@@ -369,10 +384,14 @@ function InfiniteArchive({
   items = [],
   archiveItems,
   showButton = true,
+  registerOpenFirstUnviewed,
 }: {
   items?: NewsItem[];
   archiveItems?: IntelligenceItem[];
   showButton?: boolean;
+  // Lets the parent trigger this section's lightbox (first unviewed item)
+  // from the top-stories "More news" handoff.
+  registerOpenFirstUnviewed?: (fn: () => void) => void;
 }) {
   const liveArchive = archiveItems ?? normalizeIntelligenceItems(items);
   const archive: IntelligenceItem[] = liveArchive.length > 0
@@ -457,6 +476,27 @@ function InfiniteArchive({
     setActiveIndex(index);
     markViewed(visibleArchive[index]?.id);
   };
+
+  // "More news" handoff target: open the lightbox on the first item the
+  // reader hasn't viewed yet (falling back to the top of the stream), making
+  // sure it's within the rendered window first.
+  useEffect(() => {
+    if (!registerOpenFirstUnviewed) return;
+    registerOpenFirstUnviewed(() => {
+      if (displayArchive.length === 0) {
+        document.getElementById('infinite-older-stream')?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      const firstUnviewed = displayArchive.findIndex(
+        (entry) => !(entry.id && viewedIds.has(entry.id)),
+      );
+      const index = firstUnviewed === -1 ? 0 : firstUnviewed;
+      setVisibleCount((count) => Math.max(count, index + 1));
+      setActiveIndex(index);
+      markViewed(displayArchive[index]?.id);
+      document.getElementById('infinite-older-stream')?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
 
   return (
     <section id="infinite-older-stream" className="mx-auto max-w-[1800px] px-4 py-10 sm:px-8">
