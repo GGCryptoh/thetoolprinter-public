@@ -253,7 +253,7 @@ function EditorialLedger({
         </div>
         {isVisible('todays_front_page') && (
         <div className="order-1 px-4 py-10 sm:px-8 lg:order-2">
-          <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-neutral-600">
+          <p className="font-mono text-[11px] uppercase tracking-[0.42em] text-yellow-400">
             Today&apos;s front page
           </p>
           <div className="mt-6 space-y-6">
@@ -262,10 +262,10 @@ function EditorialLedger({
                 key={story.title}
                 className={`rounded-md border p-6 ${
                   index === 0
-                    ? 'border-emerald-500/30 bg-emerald-500/[0.06]'
+                    ? 'border-emerald-400/50 bg-emerald-500/[0.12] shadow-[0_0_28px_rgba(16,185,129,0.10)]'
                     : index === 1
-                      ? 'border-red-500/25 bg-red-500/[0.05]'
-                      : 'border-yellow-500/25 bg-yellow-500/[0.05]'
+                      ? 'border-red-400/45 bg-red-500/[0.10] shadow-[0_0_28px_rgba(239,68,68,0.08)]'
+                      : 'border-yellow-400/45 bg-yellow-500/[0.10] shadow-[0_0_28px_rgba(250,204,21,0.08)]'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -289,7 +289,7 @@ function EditorialLedger({
                 >
                     {story.title}
                 </button>
-                <p className="mt-3 max-w-3xl text-base leading-7 text-neutral-400">{story.summary}</p>
+                <p className="mt-3 max-w-3xl text-base leading-7 text-neutral-300">{story.summary}</p>
                 <div className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
                   <Radio className="size-3.5" />
                   {story.source}

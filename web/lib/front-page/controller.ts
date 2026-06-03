@@ -47,9 +47,10 @@ export interface FrontPageSectionControl {
   prompt: string;
 }
 
-// Top "Today's front page" stories pick the highest-scoring approved items
-// reviewed within this window. If fewer than 3 qualify, older approved items
-// fill the gap. Older fresh items roll into the archive grid below.
+// Top "Today's front page" stories pick the most recent approved items
+// reviewed within this window (newest first, score as tiebreak). If fewer
+// than 3 qualify, older approved items fill the gap. Older fresh items roll
+// into the archive grid below.
 export const TOP_STORIES_FRESHNESS_HOURS = 72;
 export const TOP_STORIES_COUNT = 3;
 
@@ -465,8 +466,8 @@ export async function getFrontPageItems(limit: number) {
     .select('id, title, source_type, source_name, url, image_url, summary, score, score_breakdown, status, section, tags, raw_metadata, created_at, scored_at, reviewed_at')
     .eq('status', 'approved')
     .not('score', 'is', null)
-    .order('score', { ascending: false })
     .order('created_at', { ascending: false })
+    .order('score', { ascending: false })
     .limit(limit);
 
   return (data ?? []) as NewsItem[];
@@ -484,8 +485,8 @@ export function partitionFrontPageItems(
     return item.created_at ? new Date(item.created_at).getTime() : 0;
   };
 
-  // Items arrive pre-sorted by score DESC, so slicing the freshness-filtered
-  // list keeps the highest-scoring approvals in the freshness window.
+  // Items arrive pre-sorted by created_at DESC, so slicing the
+  // freshness-filtered list keeps the newest approvals on top.
   const fresh = items.filter((item) => stampOf(item) >= cutoff);
   const top = fresh.slice(0, topN);
 
