@@ -117,7 +117,9 @@ export function FrontPageOption({
     [topItems, showLiveFeed],
   );
   const archiveIntelligence = useMemo(
-    () => normalizeIntelligenceItems(showLiveFeed ? archiveItems : []),
+    // preserveOrder: items arrive sorted by reviewed_at DESC (publish time) —
+    // don't re-rank by score or freshly approved items sink down the stream.
+    () => normalizeIntelligenceItems(showLiveFeed ? archiveItems : [], { preserveOrder: true }),
     [archiveItems, showLiveFeed],
   );
 
