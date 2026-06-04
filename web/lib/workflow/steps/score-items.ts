@@ -18,6 +18,11 @@ import type { AiProvider } from '@/lib/ai/provider-config';
 const dimensionScore = z.number().min(0).max(10).nullable().catch(null);
 
 const ScoredItemSchema = z.object({
+  // The 1-based input position this result belongs to. LLMs drop, merge, and
+  // reorder list items; pairing results back to articles by array index lets
+  // one slip give every later article someone else's score. We require an
+  // explicit index and match on it instead.
+  index: z.number().int().min(1).nullable().catch(null),
   relevance: dimensionScore,
   recency: dimensionScore,
   novelty: dimensionScore,
@@ -125,9 +130,11 @@ export async function scoreNewItems(limit = 50, promptType = 'quality_manager', 
       .join('\n\n');
 
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const prompt = promptTemplate
+    const prompt = `${promptTemplate
       .replace('{{date}}', today)
-      .replace('{{items}}', itemsText);
+      .replace('{{items}}', itemsText)}
+
+IMPORTANT: Return exactly one result per input item — never drop, merge, or reorder items. Each result MUST include an "index" field set to the item's number from the input list (1, 2, 3, ...).`;
 
     try {
       console.log(`[score-items] Scoring batch ${i / batchSize + 1} (${batch.length} items)`);
@@ -179,9 +186,36 @@ export async function scoreNewItems(limit = 50, promptType = 'quality_manager', 
         continue;
       }
 
-      for (let j = 0; j < batch.length && j < scored.results.length; j++) {
-        const score = scored.results[j];
-        const item = batch[j];
+      // Pair results to articles by the model-returned index, never by array
+      // position. Positional pairing silently mis-scores every article after
+      // a dropped/merged/reordered result. Fallback to positional ONLY when
+      // the model omitted indices but returned exactly one result per item.
+      const indices = scored.results.map((r) => r.index);
+      const validIndices =
+        indices.every((n) => typeof n === 'number' && n >= 1 && n <= batch.length) &&
+        new Set(indices).size === indices.length;
+      const exactPositional = !validIndices && scored.results.length === batch.length;
+
+      if (!validIndices && !exactPositional) {
+        failedBatches++;
+        console.error(
+          `[score-items] Batch ${i / batchSize + 1} result/item mismatch: ${scored.results.length} results for ${batch.length} items with unusable indices — skipping (items stay unscored and retry next run)`,
+        );
+        await logIngestEvent({
+          workflowRunId,
+          step: 'score:error',
+          level: 'error',
+          message: `Batch ${i / batchSize + 1} rejected: ${scored.results.length} results for ${batch.length} items and no usable index fields. Items remain unscored for retry.`,
+          metrics: { batch: i / batchSize + 1, batchSize: batch.length, results: scored.results.length },
+        });
+        continue;
+      }
+
+      const pairs = validIndices
+        ? scored.results.map((score) => ({ score, item: batch[(score.index as number) - 1] }))
+        : scored.results.map((score, j) => ({ score, item: batch[j] }));
+
+      for (const { score, item } of pairs) {
 
         // Recency is objective; the model frequently omits it or guesses low,
         // which capped weighted scores and starved the publish gate. Derive it
@@ -243,6 +277,23 @@ export async function scoreNewItems(limit = 50, promptType = 'quality_manager', 
             operatorUsefulness: score.operatorUsefulness,
             words: countWords(item.title, item.summary, score.summary),
             reason: score.qualityReason,
+          },
+        });
+      }
+
+      // Index-matched but incomplete: the model dropped items. They keep a
+      // null score and are picked up again on the next scoring run.
+      if (validIndices && pairs.length < batch.length) {
+        const scoredIds = new Set(pairs.map(({ item }) => item.id));
+        const dropped = batch.filter((entry) => !scoredIds.has(entry.id));
+        await logIngestEvent({
+          workflowRunId,
+          step: 'score:warning',
+          level: 'warning',
+          message: `Batch ${i / batchSize + 1}: model returned ${pairs.length}/${batch.length} results; ${dropped.length} item(s) left unscored for retry.`,
+          metrics: {
+            batch: i / batchSize + 1,
+            droppedTitles: dropped.map((entry) => entry.title).slice(0, 5),
           },
         });
       }

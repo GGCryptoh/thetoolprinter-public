@@ -96,6 +96,11 @@ Once completed, `/setup` becomes a dead route (it returns 404) so it can't be
 re-run by a visitor. You can re-open it only by clearing the setup flag in the
 database.
 
+> **⚠️ Set `ADMIN_PASS` before the deploy is publicly reachable.** Completing
+> setup requires the bootstrap password — the API refuses to finish setup
+> without it (403). This closes the first-run takeover window where an
+> anonymous visitor could otherwise set the admin password on a fresh deploy.
+
 ---
 
 ## 6. Log in and verify

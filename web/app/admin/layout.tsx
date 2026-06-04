@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { connection } from 'next/server';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { checkAuth } from '@/lib/auth/admin';
 import { Separator } from '@/components/ui/separator';
 
 const navItems = [
@@ -37,11 +37,13 @@ export default async function AdminLayout({
 
 async function AdminShell({ children }: { children: React.ReactNode }) {
   await connection();
-  const cookieStore = await cookies();
-  const hasToken = cookieStore.has('aitea-admin');
+  // Verify the JWT here, not just cookie presence — the middleware is the
+  // primary gate, but the layout renders service-role data and shouldn't
+  // depend on a single check (middleware bypass is a known Next.js CVE class).
+  const authed = await checkAuth();
 
   // If not authenticated, render children directly (login page)
-  if (!hasToken) {
+  if (!authed) {
     return <>{children}</>;
   }
 

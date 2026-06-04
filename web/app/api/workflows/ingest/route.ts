@@ -1,16 +1,12 @@
 import { start } from 'workflow/api';
+import { requireCronAuth } from '@/lib/api/cron-auth';
 import { getFrontPageController } from '@/lib/front-page/controller';
 import { ingestWorkflow } from '@/lib/workflow/ingest';
 import { shouldStartScheduledIngest } from '@/lib/workflow/schedule';
 
 export async function POST(req: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get('authorization');
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  }
+  const denied = requireCronAuth(req);
+  if (denied) return denied;
 
   const controlRunId = crypto.randomUUID();
   const run = await start(ingestWorkflow, [controlRunId]);
@@ -24,16 +20,10 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const authHeader = req.headers.get('authorization');
-  const url = new URL(req.url);
-  if (cronSecret) {
-    const token = url.searchParams.get('token');
-    if (token !== cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-  }
+  const denied = requireCronAuth(req);
+  if (denied) return denied;
 
+  const url = new URL(req.url);
   const force = url.searchParams.get('force') === '1' || url.searchParams.get('force') === 'true';
   if (!force) {
     const controller = await getFrontPageController();

@@ -30,14 +30,20 @@ export async function POST(req: Request) {
     );
   }
 
-  // If an env bootstrap password exists, require it to authorize taking over setup.
-  if (hasAdminPassword()) {
-    if (!body.bootstrap || !(await checkPassword(body.bootstrap))) {
-      return Response.json(
-        { error: 'Current bootstrap password (ADMIN_PASS) is required to complete setup.' },
-        { status: 401 }
-      );
-    }
+  // The bootstrap password is REQUIRED to complete setup. Without this, a
+  // deploy that's publicly reachable before setup finishes lets any anonymous
+  // visitor set the admin password and take over (first-run takeover).
+  if (!hasAdminPassword()) {
+    return Response.json(
+      { error: 'Set ADMIN_PASS on the server before completing setup. It authorizes this one-time bootstrap.' },
+      { status: 403 }
+    );
+  }
+  if (!body.bootstrap || !(await checkPassword(body.bootstrap))) {
+    return Response.json(
+      { error: 'Current bootstrap password (ADMIN_PASS) is required to complete setup.' },
+      { status: 401 }
+    );
   }
 
   const password = (body.password ?? '').trim();
