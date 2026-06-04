@@ -251,9 +251,11 @@ drop policy if exists "Public read active feeds" on public.aitea_feeds;
 create policy "Public read active feeds" on public.aitea_feeds
   for select using (active = true);
 
+-- aitea_knowledge_blocks holds editorial prompts + controller config (prompt
+-- IP). No anon read policy: RLS stays enabled with zero policies, so only the
+-- server's service-role client can read it. The drop below also removes the
+-- old public-read policy when re-applying this schema to an existing DB.
 drop policy if exists "Public read knowledge blocks" on public.aitea_knowledge_blocks;
-create policy "Public read knowledge blocks" on public.aitea_knowledge_blocks
-  for select using (true);
 
 drop policy if exists "Public read active people" on public.aitea_people;
 create policy "Public read active people" on public.aitea_people
